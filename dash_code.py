@@ -1,5 +1,8 @@
+import base64
+from pathlib import Path
 import pandas as pd
 import csv
+import os
 import matplotlib.pyplot as plt
 from scipy.interpolate import make_interp_spline
 import numpy as np
@@ -12,15 +15,29 @@ from dash.dependencies import Input,Output,State
 
 df=pd.read_csv("run_df.csv")
 
-buttom_flag=""
+button_flag=""
 min_date=df[df["date"]==min(df["date"])][["year","month","day"]][:1]
 max_date=df[df["date"]==max(df["date"])][["year","month","day"]][:1]
 
 min_date_date=date(int(min_date["year"]),int(min_date["month"]),int(min_date["day"]))
 max_date_date = date(int(max_date["year"]), int(max_date["month"]), int(max_date["day"]))
 
+# image_filename = 'blm-protest.jpg' 
+# encoded_image = base64.b64encode(open(image_filename, 'rb').read())
+
 app=Dash(__name__)
 app.layout=html.Div([
+                    html.Div(id="pics",children=[
+                            # html.Img(src=f"https://media-cldnry.s-nbcnews.com/image/upload/newscms/2020_34/3405461/200818-blm-protest-jm-1115.jpg",style = {'float':'right', 'anchor':'top', 'display': 'inline-block',"width": "30%","height":"45%"}),
+                            html.Img(src=app.get_asset_url('blm-protest.jpg'),style = {'float':'right', 'anchor':'top', 'display': 'inline-block',"width": "290px","height":"155px"}),
+                            html.Img(src=app.get_asset_url('police.jpg'),style={'display': 'inline-block',"width": "60%","height": "150px"})
+                        ],
+                        style={"width":"50%", "float":"right", "anchor":"top", "height":"200"}),
+                    html.H2("Police shootings on civilians in the USA"),
+                    html.P(["You can change start date and end date from the date picker right below, or just change years with the slider.",\
+                        html.Br(),"Here's a tip, enter year in YY format in end range to set the picker to that year."]),
+                    #html.Img(src=f"file:///C:/Users/user/Downloads/police.jfif",style = {'display' : 'flex', 'float':'right'}),
+                    # html.Img(src='data:image/jpg;base64,{}'.format(encoded_image)),
                     dcc.DatePickerRange(
                          id="Picker-Range",
                          min_date_allowed=min_date_date,
@@ -40,7 +57,7 @@ app.layout=html.Div([
                         tooltip={"placement": "bottom", "always_visible": True},
                         allowCross=False
                     ),
-                    html.Button('reset', id='reset_to_defelut',n_clicks=0),
+                    html.Button('reset', id='reset_to_default',n_clicks=0),
                     html.Div(id="bar_buttons",children=[
                         html.Button('year', id='show_year',n_clicks=0),
                         html.Button('month', id='show_month',n_clicks=0,disabled=True),
@@ -68,7 +85,7 @@ app.layout=html.Div([
                         # step=1,
                         tooltip={"placement": "bottom", "always_visible": True}
                     ),
-                    html.Button('clear', id='crear_break_down',n_clicks=0),
+                    html.Button('clear', id='clear_break_down',n_clicks=0),
                     html.Button('all', id='all_break_down',n_clicks=0),
                     dcc.Dropdown(
                         id="break_down",
@@ -95,7 +112,7 @@ app.layout=html.Div([
     Input('show_month', 'n_clicks'),
     Input('show_day', 'n_clicks'))
 def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,press_m,press_d):
-    global buttom_flag
+    global button_flag
     data=df.query(f"date>='{str(start_date)}'").query(f"date<='{str(end_date)}'")
     data=data[data["state"].isin(break_value)]
     gender_data=data[data["gender"].isin(gender)]
@@ -130,8 +147,8 @@ def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,p
 
 
     if ctx.triggered_id in ["show_month","show_day","show_year"]:
-        buttom_flag=ctx.triggered_id
-    if buttom_flag=="show_month" and not dont_show_month:
+        button_flag=ctx.triggered_id
+    if button_flag=="show_month" and not dont_show_month:
         fig_bar.add_trace(go.Bar(
             x=[f"{y}-{m}" for y,m in sorted(gender_data[["year","month"]].drop_duplicates().to_numpy(),key=lambda x: x[0])],
             y=[i for _,i in sorted(dict(gender_data[["year","month"]].value_counts()).items(),key=lambda x: x[0])],
@@ -141,7 +158,7 @@ def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,p
           ))
         fig_bar.update_traces(hovertemplate="<br>".join([
             "Month: %{customdata}",
-            "Value: %{y}"
+            "Amount of dead: %{y}"
         ]))
         # fig_bar.add_trace(go.Scatter(
         #     x=[f"{y}-{m}" for y, m in sorted(gender_data[["year", "month"]].drop_duplicates().to_numpy(), key=lambda x: x[0])],
@@ -151,7 +168,7 @@ def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,p
         #     hoverinfo="skip"
         # ))
 
-    elif buttom_flag=="show_day" and not dont_show_day:
+    elif button_flag=="show_day" and not dont_show_day:
         fig_bar.add_trace(go.Bar(
             x=[d for d, _, _, _ in sorted(gender_data[["date", "year", "month", "day"]].drop_duplicates().to_numpy(), key=lambda x: x[0])],
             y=[i for _, i in sorted(dict(gender_data[["year", "month","day"]].value_counts()).items(), key=lambda x: x[0])],
@@ -159,8 +176,8 @@ def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,p
             marker={"color":"lightgreen"}
           ))
         fig_bar.update_traces(hovertemplate="<br>".join([
-            "Year: %{x}",
-            "Value: %{y}"
+            "Date: %{x}",
+            "Amount of dead: %{y}"
         ]))
         # fig_bar.add_trace(go.Scatter(
         #     x=[d for d, _, _, _ in sorted(gender_data[["date", "year", "month", "day"]].drop_duplicates().to_numpy(), key=lambda x: x[0])],
@@ -177,8 +194,8 @@ def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,p
             marker={"color":"lightgreen"}
           ))
         fig_bar.update_traces(hovertemplate="<br>".join([
-        "Year: %{x}",
-        "Value: %{y}"
+            "Year: %{x}",
+            "Amount of dead: %{y}"
         ]))
         # fig_bar.add_trace(go.Scatter(
         #     x=[str(i) for i in sorted(list(gender_data["year"].unique()))],
@@ -197,17 +214,12 @@ def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,p
     fig_pie.add_trace(go.Pie(labels=list(cases.keys()), values=list(cases.values())))
     fig_pie.update_traces(textinfo='percent+label')
     fig_pie.update_layout(
-        title='Precent of shoot incident by race',
+        title='Percent of shooting incidents by race',
         title_x=0.5,
         title_xanchor="center",
         legend_itemdoubleclick="toggleothers"
     )
-    fig_map.add_trace(go.Choropleth(
-    locations=data['state'].unique(), # Spatial coordinates
-    z = data["state"].value_counts(), # Data to be color-coded
-    locationmode = 'USA-states', # set of locations match entries in `locations`
-    colorscale = 'Reds'
-    ))
+    
     if "M" in gender:
         fig_map.add_trace(go.Scattergeo(
             lon=data.query("gender=='M'")["longitude"],
@@ -215,7 +227,7 @@ def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,p
             mode="markers",
             marker=dict(color="blue",opacity=0.7),
             name="Male",
-            customdata=data.query("gender=='M'")[["name","date","age","race_full"]],
+            customdata=data.query("gender=='M'")[["is_geocoding_exact","name","date","age","race_full"]],
             showlegend=False
         ))
     if "F" in gender:
@@ -225,24 +237,32 @@ def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,p
             mode="markers",
             marker=dict(color="red",opacity=0.7),
             name="Female",
-            customdata=data.query("gender=='F'")[["name","date","age","race_full"]],
+            customdata=data.query("gender=='F'")[["is_geocoding_exact","name","date","age","race_full"]],
             showlegend=False
         ))
     fig_map.update_traces(hovertemplate="<br>".join([
-        "Longitude: %{lon}",
-        "Latitude: %{lat}",
-        "Name: %{customdata[0]}",
-        "Date: %{customdata[1]}",
-        "Age: %{customdata[2]}",
-        "Race: %{customdata[3]}",
+        "Location: (%{lat}&deg;,%{lon}&deg;)",
+        "Exact Location: %{customdata[0]}",
+        "Name: %{customdata[1]}",
+        "Date: %{customdata[2]}",
+        "Age: %{customdata[3]}",
+        "Race: %{customdata[4]}"
     ]))
+    fig_map.add_trace(go.Choropleth(
+    locations=data['state'].unique(), # Spatial coordinates
+    z = data["state"].value_counts(), # Data to be color-coded
+    locationmode = 'USA-states', # set of locations match entries in `locations`
+    colorscale = 'Reds',
+    hoverinfo='skip'
+    ))
 
     fig_map.update_layout(
         title='Police shooting incidents in USA',
         title_x=0.5,
         title_xanchor="center",
         geo_scope='usa',  # limite map scope to USA
-        legend_itemdoubleclick="toggleothers"
+        legend_itemdoubleclick="toggleothers",
+        legend_title={"text":"Amount of deaths"}
     )
 
 
@@ -253,23 +273,23 @@ def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,p
     Output("break_down", 'value'),
     Output("break_down", 'options'),
     Input('range_slider_kiling_amount', 'value'),
-    Input('crear_break_down', 'n_clicks'),
+    Input('clear_break_down', 'n_clicks'),
     Input('all_break_down', 'n_clicks'),
-    Input("reset_to_defelut", "n_clicks"),
+    Input("reset_to_default", "n_clicks"),
     State("break_down", 'value'),
     State("break_down", 'options'))
-def change_contry(value,clear,choose_all,reset,curr_value,all_contry):
+def change_contry(value,clear,choose_all,reset,curr_value,all_countries):
     curr_id = ctx.triggered_id
     if curr_id is None:
-        return ([list(df["state"].unique()),all_contry])
-    elif curr_id=='crear_break_down':
-        return([[],all_contry])
+        return ([list(df["state"].unique()),all_countries])
+    elif curr_id=='clear_break_down':
+        return([[],all_countries])
     elif curr_id=='all_break_down':
-        return ([list(df["state"].unique()),all_contry])
+        return ([list(df["state"].unique()),all_countries])
     elif curr_id=='range_slider_kiling_amount':
         option=[i for i,j in dict(df["state"].value_counts()).items() if j>=value]
         return([curr_value,option])
-    elif curr_id=='reset_to_defelut':
+    elif curr_id=='reset_to_default':
         return([list(df["state"].unique()),list(df["state"].unique())])
 
 
@@ -277,11 +297,11 @@ def change_contry(value,clear,choose_all,reset,curr_value,all_contry):
     Output("Picker-Range","start_date"),
     Output("Picker-Range", "end_date"),
     Input("range-slider",'value'),
-    Input("reset_to_defelut", "n_clicks"),
+    Input("reset_to_default", "n_clicks"),
     State("Picker-Range", "start_date"),
     State("Picker-Range", "end_date"))
 def update_output_2(values,reset,start_date, end_date):
-    if ctx.triggered_id=="reset_to_defelut":
+    if ctx.triggered_id=="reset_to_default":
         return([min_date_date,max_date_date])
     curr_min=str(values[0])+start_date[4:]
     curr_max=str(values[1])+end_date[4:]
@@ -294,8 +314,8 @@ def update_output_2(values,reset,start_date, end_date):
 @app.callback(
     Output("check_gender","value"),
     Output('range_slider_kiling_amount', 'value'),
-    Input("reset_to_defelut", "n_clicks"))
-def reset_gender(acc):
+    Input("reset_to_default", "n_clicks"))
+def reset_gender(reset):
     return([["M","F"],0])
 
 if __name__ == '__main__':
