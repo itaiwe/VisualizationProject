@@ -27,17 +27,21 @@ max_date_date = date(int(max_date["year"]), int(max_date["month"]), int(max_date
 
 app = Dash(__name__)
 app.layout = html.Div([
+                html.Div(id="text_and_pics",children=[
+                    html.Div(id="text",children=[html.H2("Police shootings on civilians in the USA"),
+                    html.P(["You can change start date and end date from the date picker right below, or just change years with the slider.",\
+                        html.Br(), "Here's a tip, enter year in YY format in end range to set the picker to that year."])
+                        ],style={"width":"50%", "float":"left", "anchor":"top",'display': 'inline-block'}),
                     html.Div(id="pics", children=[
                             # html.Img(src=f"https://media-cldnry.s-nbcnews.com/image/upload/newscms/2020_34/3405461/200818-blm-protest-jm-1115.jpg",style = {'float':'right', 'anchor':'top', 'display': 'inline-block',"width": "30%","height":"45%"}),
-                            html.Img(src=app.get_asset_url('blm-protest.jpg'), style= {'float':'right', 'anchor':'top', 'display': 'inline-block', "width": "290px", "height":"155px"}),
-                            html.Img(src=app.get_asset_url('police.jpg'), style= {'display': 'inline-block', "width": "60%", "height": "150px"})
+                            html.Img(src=app.get_asset_url('blm-protest.jpg'), style= {'float':'right', 'anchor':'top', 'display': 'inline-block', "width": "40%", "height": "40%"}),
+                            html.Img(src=app.get_asset_url('police.jpg'), style= {'display': 'inline-block', "width": "60%","object-fit":"scale-down", "anchor":"top"})
                         ],
-                        style= {"width":"50%", "float":"right", "anchor":"top", "height":"200"}),
-                    html.H2("Police shootings on civilians in the USA"),
-                    html.P(["You can change start date and end date from the date picker right below, or just change years with the slider.",\
-                        html.Br(), "Here's a tip, enter year in YY format in end range to set the picker to that year."]),
-                    #html.Img(src=f"file:///C:/Users/user/Downloads/police.jfif",style = {'display' : 'flex', 'float':'right'}),
+                        style= {"width":"50%", "float":"right", "anchor":"top",'display': 'inline-block',"position":"relative"})
+                ]),
+                                        #html.Img(src=f"file:///C:/Users/user/Downloads/police.jfif",style = {'display' : 'flex', 'float':'right'}),
                     # html.Img(src='data:image/jpg;base64,{}'.format(encoded_image)),
+                html.Div(id="else",children=[
                     dcc.DatePickerRange(
                          id="Picker-Range",
                          min_date_allowed=min_date_date,
@@ -92,7 +96,8 @@ app.layout = html.Div([
                         options=list(df["state"].unique()),
                         value=list(df["state"].unique()),
                         multi=True)
-                     ])
+                ],style={"clear":"left","anchor":"bottom"})
+            ])
 
 @app.callback(
     Output('amount-shoot-or-taser','figure'),
@@ -297,9 +302,10 @@ def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,p
     Input('clear_break_down', 'n_clicks'),
     Input('all_break_down', 'n_clicks'),
     Input("reset_to_default", "n_clicks"),
+    Input("pie-race-by-date", 'clickData'),
     State("break_down", 'value'),
     State("break_down", 'options'))
-def change_contry(value,clear,choose_all,reset,curr_value,all_countries):
+def change_contry(value,clear,choose_all,reset,click_race,curr_value,all_countries):
     curr_id = ctx.triggered_id
     if curr_id is None:
         return [list(df["state"].unique()),all_countries]
@@ -312,7 +318,10 @@ def change_contry(value,clear,choose_all,reset,curr_value,all_countries):
         return [curr_value,option]
     elif curr_id=='reset_to_default':
         return [list(df["state"].unique()),list(df["state"].unique())]
-
+    elif curr_id=='pie-race-by-date':
+        curr_label = click_race["points"][0]["label"]
+        data=df.query(f"race_full=='{curr_label}'")
+        return [list(data["state"].unique()),all_countries]
 
 @app.callback(
     Output("Picker-Range","start_date"),
