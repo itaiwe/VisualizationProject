@@ -58,7 +58,7 @@ app.layout = html.Div([
                         value=[int(min_date["year"]),int(max_date["year"])],
                         marks={str(i):f"{i}" for i in df["year"].unique()},
                         step=1,
-                        tooltip={"placement": "bottom", "always_visible": True},
+                        tooltip={"placement": "bottom", "always_visible": False},
                         allowCross=False
                     ),
                     html.Button('reset', id='reset_to_default', n_clicks=0),
@@ -116,7 +116,7 @@ app.layout = html.Div([
     Input('show_year', 'n_clicks'),
     Input('show_month', 'n_clicks'),
     Input('show_day', 'n_clicks'))
-def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,press_m,press_d):
+def main(click,break_value,start_date, end_date,gender,press_y,press_m,press_d):
     global button_flag
     data=df.query(f"date>='{str(start_date)}'").query(f"date<='{str(end_date)}'")
     data=data[data["state"].isin(break_value)]
@@ -160,7 +160,14 @@ def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,p
             name="temp",
             customdata=[date(y,m,1).strftime('%b, %Y') for y,m in sorted(gender_data[["year","month"]].drop_duplicates().to_numpy(),key=lambda x: x[0])],
             marker={"color":"lightgreen"}
-          ))
+          ))        
+        fig_bar.update_layout(
+            title='Amount of incidents per month',
+            title_x=0.5,
+            title_xanchor="center",
+            xaxis={'title':"Month"},
+            yaxis={'title':"Deaths"}
+        )
         fig_bar.update_traces(hovertemplate="<br>".join([
             "Month: %{customdata}",
             "Amount of dead: %{y}"
@@ -180,6 +187,13 @@ def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,p
             name="temp",
             marker={"color":"lightgreen"}
           ))
+        fig_bar.update_layout(
+            title='Amount of incidents per day',
+            title_x=0.5,
+            title_xanchor="center",
+            xaxis={'title':"Day"},
+            yaxis={'title':"Deaths"}
+        )
         fig_bar.update_traces(hovertemplate="<br>".join([
             "Date: %{x}",
             "Amount of dead: %{y}"
@@ -198,6 +212,13 @@ def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,p
             name="temp",
             marker={"color":"lightgreen"}
           ))
+        fig_bar.update_layout(
+            title='Amount of incidents per year',
+            title_x=0.5,
+            title_xanchor="center",
+            xaxis={'title':"Year"},
+            yaxis={'title':"Deaths"}
+        )
         fig_bar.update_traces(hovertemplate="<br>".join([
             "Year: %{x}",
             "Amount of dead: %{y}"
@@ -330,7 +351,7 @@ def change_contry(value,clear,choose_all,reset,click_race,curr_value,all_countri
     Input("reset_to_default", "n_clicks"),
     State("Picker-Range", "start_date"),
     State("Picker-Range", "end_date"))
-def update_output_2(values,reset,start_date, end_date):
+def change_date(values,reset,start_date, end_date):
     if ctx.triggered_id=="reset_to_default":
         return [min_date_date,max_date_date]
     curr_min=str(values[0])+start_date[4:]
@@ -345,8 +366,8 @@ def update_output_2(values,reset,start_date, end_date):
     Output("check_gender","value"),
     Output('range_slider_kiling_amount', 'value'),
     Input("reset_to_default", "n_clicks"))
-def reset_gender(reset):
+def reset_  (reset):
     return [["M","F"], 0]
 
 if __name__ == '__main__':
-  app.run_server(debug=True)
+  app.run_server(debug=False)
