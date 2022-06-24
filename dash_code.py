@@ -13,29 +13,29 @@ from datetime import date
 from dash import Dash,dcc,html,ctx
 from dash.dependencies import Input,Output,State
 
-df=pd.read_csv("run_df.csv")
+df = pd.read_csv("run_df.csv")
 
-button_flag=""
-min_date=df[df["date"]==min(df["date"])][["year","month","day"]][:1]
-max_date=df[df["date"]==max(df["date"])][["year","month","day"]][:1]
+button_flag = ""
+min_date = df[df["date"] == min(df["date"])][["year", "month", "day"]][:1]
+max_date = df[df["date"] == max(df["date"])][["year", "month", "day"]][:1]
 
-min_date_date=date(int(min_date["year"]),int(min_date["month"]),int(min_date["day"]))
+min_date_date = date(int(min_date["year"]), int(min_date["month"]), int(min_date["day"]))
 max_date_date = date(int(max_date["year"]), int(max_date["month"]), int(max_date["day"]))
 
 # image_filename = 'blm-protest.jpg' 
 # encoded_image = base64.b64encode(open(image_filename, 'rb').read())
 
-app=Dash(__name__)
-app.layout=html.Div([
-                    html.Div(id="pics",children=[
+app = Dash(__name__)
+app.layout = html.Div([
+                    html.Div(id="pics", children=[
                             # html.Img(src=f"https://media-cldnry.s-nbcnews.com/image/upload/newscms/2020_34/3405461/200818-blm-protest-jm-1115.jpg",style = {'float':'right', 'anchor':'top', 'display': 'inline-block',"width": "30%","height":"45%"}),
-                            html.Img(src=app.get_asset_url('blm-protest.jpg'),style = {'float':'right', 'anchor':'top', 'display': 'inline-block',"width": "290px","height":"155px"}),
-                            html.Img(src=app.get_asset_url('police.jpg'),style={'display': 'inline-block',"width": "60%","height": "150px"})
+                            html.Img(src=app.get_asset_url('blm-protest.jpg'), style= {'float':'right', 'anchor':'top', 'display': 'inline-block', "width": "290px", "height":"155px"}),
+                            html.Img(src=app.get_asset_url('police.jpg'), style= {'display': 'inline-block', "width": "60%", "height": "150px"})
                         ],
-                        style={"width":"50%", "float":"right", "anchor":"top", "height":"200"}),
+                        style= {"width":"50%", "float":"right", "anchor":"top", "height":"200"}),
                     html.H2("Police shootings on civilians in the USA"),
                     html.P(["You can change start date and end date from the date picker right below, or just change years with the slider.",\
-                        html.Br(),"Here's a tip, enter year in YY format in end range to set the picker to that year."]),
+                        html.Br(), "Here's a tip, enter year in YY format in end range to set the picker to that year."]),
                     #html.Img(src=f"file:///C:/Users/user/Downloads/police.jfif",style = {'display' : 'flex', 'float':'right'}),
                     # html.Img(src='data:image/jpg;base64,{}'.format(encoded_image)),
                     dcc.DatePickerRange(
@@ -57,11 +57,11 @@ app.layout=html.Div([
                         tooltip={"placement": "bottom", "always_visible": True},
                         allowCross=False
                     ),
-                    html.Button('reset', id='reset_to_default',n_clicks=0),
-                    html.Div(id="bar_buttons",children=[
-                        html.Button('year', id='show_year',n_clicks=0),
-                        html.Button('month', id='show_month',n_clicks=0,disabled=True),
-                        html.Button('day', id='show_day',n_clicks=0,disabled=True)
+                    html.Button('reset', id='reset_to_default', n_clicks=0),
+                    html.Div(id="bar_buttons", children=[
+                        html.Button('year', id='show_year', n_clicks=0),
+                        html.Button('month', id='show_month', n_clicks=0, disabled=True),
+                        html.Button('day', id='show_day', n_clicks=0, disabled=True)
                     ]),
                     dcc.Checklist(
                         id="check_gender",
@@ -72,9 +72,9 @@ app.layout=html.Div([
                         inline=True
                     ),
                     html.Div(dcc.Graph(id='amount-shoot-or-taser')),
-                    html.Div(id="map_and_pie",children=[
-                            dcc.Graph(id="map-shoot-or-taser", style={'display': 'inline-block',"width": "50%"}),
-                            dcc.Graph(id="pie-race-by-date", style={'display': 'inline-block',"width": "50%"})
+                    html.Div(id="map_and_pie", children=[
+                            dcc.Graph(id="map-shoot-or-taser", style={'display': 'inline-block', "width": "50%"}),
+                            dcc.Graph(id="pie-race-by-date", style={'display': 'inline-block', "width": "50%"})
                         ]),
                     dcc.Slider(
                         min=0,
@@ -85,8 +85,8 @@ app.layout=html.Div([
                         # step=1,
                         tooltip={"placement": "bottom", "always_visible": True}
                     ),
-                    html.Button('clear', id='clear_break_down',n_clicks=0),
-                    html.Button('all', id='all_break_down',n_clicks=0),
+                    html.Button('clear', id='clear_break_down', n_clicks=0),
+                    html.Button('all', id='all_break_down', n_clicks=0),
                     dcc.Dropdown(
                         id="break_down",
                         options=list(df["state"].unique()),
@@ -131,7 +131,7 @@ def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,p
     maximum = max(dict(df["state"].value_counts()).values())
 
     if gender_data.empty:
-        return ([fig_bar, fig_pie, fig_map, end_date, [int(start_date[:4]), int(end_date[:4])], maximum, dont_show_month,dont_show_day])
+        return [fig_bar, fig_pie, fig_map, end_date, [int(start_date[:4]), int(end_date[:4])], maximum, dont_show_month,dont_show_day]
 
     maximum = max(dict(data["state"].value_counts()).values())
     curr_min_data = gender_data[gender_data["date"] == min(gender_data["date"])][["year", "month", "day"]][:1]
@@ -140,9 +140,9 @@ def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,p
     curr_max_date=date(int(curr_max_data["year"]),int(curr_max_data["month"]),int(curr_max_data["day"]))
     diff_month=(curr_max_date.year-curr_min_date.year)*12+(curr_max_date.month-curr_min_date.month)
 
-    if diff_month<=36:
+    if diff_month <= 36:
         dont_show_month=False
-    if diff_month<=12:
+    if diff_month <= 12:
         dont_show_day = False
 
 
@@ -253,8 +253,24 @@ def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,p
     z = data["state"].value_counts(), # Data to be color-coded
     locationmode = 'USA-states', # set of locations match entries in `locations`
     colorscale = 'Reds',
-    hoverinfo='skip'
+    hoverinfo='skip',
+    colorbar={"title":"Amount of deaths"}
+    # showlegendgroup=True,
+    # legendgrouptitle={"text":"Amount of deaths"}
     ))
+
+    # states_df = pd.DataFrame(data["state"].value_counts()).reset_index()
+    # states_df.columns = ["state", "counts"]
+
+    # fig_map.add_trace(px.choropleth(
+    #     states_df,
+    #     locations = "state",
+    #     color = "counts",
+    #     locationmode='USA-states',
+    #     color_continuous_scale="Reds",
+    #     # #hoverinfo='skip',
+    #     # hovertemplate=None
+    # ))
 
     fig_map.update_layout(
         title='Police shooting incidents in USA',
@@ -262,11 +278,16 @@ def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,p
         title_xanchor="center",
         geo_scope='usa',  # limite map scope to USA
         legend_itemdoubleclick="toggleothers",
-        legend_title={"text":"Amount of deaths"}
+        #legend_title={"text":"Amount of deaths"}
+    )
+    
+    fig_map.update_coloraxes(
+        showscale=True,
+        #colorbar_tickformatstops=list(dict(name="Amount of deaths"))
     )
 
 
-    return([fig_bar,fig_pie,fig_map,end_date,[int(start_date[:4]),int(end_date[:4])],maximum,dont_show_month,dont_show_day])
+    return [fig_bar,fig_pie,fig_map,end_date,[int(start_date[:4]),int(end_date[:4])],maximum,dont_show_month,dont_show_day]
 
 
 @app.callback(
@@ -281,16 +302,16 @@ def update_graph_by_date(click,break_value,start_date, end_date,gender,press_y,p
 def change_contry(value,clear,choose_all,reset,curr_value,all_countries):
     curr_id = ctx.triggered_id
     if curr_id is None:
-        return ([list(df["state"].unique()),all_countries])
+        return [list(df["state"].unique()),all_countries]
     elif curr_id=='clear_break_down':
-        return([[],all_countries])
+        return [[],all_countries]
     elif curr_id=='all_break_down':
-        return ([list(df["state"].unique()),all_countries])
+        return [list(df["state"].unique()),all_countries]
     elif curr_id=='range_slider_kiling_amount':
         option=[i for i,j in dict(df["state"].value_counts()).items() if j>=value]
-        return([curr_value,option])
+        return [curr_value,option]
     elif curr_id=='reset_to_default':
-        return([list(df["state"].unique()),list(df["state"].unique())])
+        return [list(df["state"].unique()),list(df["state"].unique())]
 
 
 @app.callback(
@@ -302,21 +323,21 @@ def change_contry(value,clear,choose_all,reset,curr_value,all_countries):
     State("Picker-Range", "end_date"))
 def update_output_2(values,reset,start_date, end_date):
     if ctx.triggered_id=="reset_to_default":
-        return([min_date_date,max_date_date])
+        return [min_date_date,max_date_date]
     curr_min=str(values[0])+start_date[4:]
     curr_max=str(values[1])+end_date[4:]
     if str(min_date_date)>=curr_min:
         curr_min=min_date_date
     if str(max_date_date)<=curr_max:
         curr_max = max_date_date
-    return(curr_min,curr_max)
+    return curr_min,curr_max
 
 @app.callback(
     Output("check_gender","value"),
     Output('range_slider_kiling_amount', 'value'),
     Input("reset_to_default", "n_clicks"))
 def reset_gender(reset):
-    return([["M","F"],0])
+    return [["M","F"], 0]
 
 if __name__ == '__main__':
   app.run_server(debug=True)
