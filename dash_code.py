@@ -4,7 +4,7 @@ from datetime import date
 from dash import Dash,dcc,html,ctx
 from dash.dependencies import Input,Output,State
 
-df = pd.read_csv("data/run_df_19_6.csv")
+df = pd.read_csv("data/run_df_23_6.csv")
 
 button_flag = ""
 min_date = df[df["date"] == min(df["date"])][["year", "month", "day"]][:1]
