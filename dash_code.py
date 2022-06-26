@@ -166,13 +166,6 @@ def main(click, break_value, start_date, end_date, gender, press_y, press_m, pre
             "Month: %{customdata}",
             "Amount of dead: %{y}"
         ]))
-        # fig_bar.add_trace(go.Scatter(
-        #     x=[f"{y}-{m}" for y, m in sorted(gender_data[["year", "month"]].drop_duplicates().to_numpy(), key=lambda x: x[0])],
-        #     y=[i for _, i in sorted(dict(gender_data[["year", "month"]].value_counts()).items(), key=lambda x: x[0])],
-        #     mode='lines+markers',
-        #     showlegend=False,
-        #     hoverinfo="skip"
-        # ))
 
     elif button_flag == "show_day" and not dont_show_day:
         fig_bar.add_trace(go.Bar(
@@ -192,13 +185,6 @@ def main(click, break_value, start_date, end_date, gender, press_y, press_m, pre
             "Date: %{x}",
             "Amount of dead: %{y}"
         ]))
-        # fig_bar.add_trace(go.Scatter(
-        #     x=[d for d, _, _, _ in sorted(gender_data[["date", "year", "month", "day"]].drop_duplicates().to_numpy(), key=lambda x: x[0])],
-        #     y=[i for _, i in sorted(dict(gender_data[["year", "month","day"]].value_counts()).items(), key=lambda x: x[0])],
-        #     mode='lines+markers',
-        #     showlegend=False,
-        #     hoverinfo="skip"
-        # ))
     else:
         fig_bar.add_trace(go.Bar(
             x=[str(i) for i in sorted(list(gender_data["year"].unique()))],
@@ -217,13 +203,6 @@ def main(click, break_value, start_date, end_date, gender, press_y, press_m, pre
             "Year: %{x}",
             "Amount of dead: %{y}"
         ]))
-        # fig_bar.add_trace(go.Scatter(
-        #     x=[str(i) for i in sorted(list(gender_data["year"].unique()))],
-        #     y=[i for _,i in sorted(dict(gender_data["year"].value_counts()).items(),key=lambda x: x[0])],
-        #     mode='lines+markers',
-        #     showlegend=False,
-        #     hoverinfo="skip"
-        # ))
 
     if {"M", "F"} != set(gender):
         if "M" in gender:
@@ -347,4 +326,5 @@ def reset_(reset):
     return [["M", "F"], 0]
 
 if __name__ == '__main__':
+  app.title = "Police Shootings"
   app.run(debug=False)
